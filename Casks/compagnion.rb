@@ -1,33 +1,29 @@
 cask "compagnion" do
-  version "0.1.0,136"
-  sha256 "0ebb1accd82f450a44a2874231280b1fe56aa1552604c7bd705cb849771a2ee1"
+  version "0.1.0,137"
+  sha256 "57c06a42092dff9533018ee794b5ba5568794d8a22a93c32e84c30be6e4ae4ae"
 
-  url "https://compagnion.innovative.nl/downloads/Compagnion-#{version.csv.first}-#{version.csv.second}.dmg"
+  url "https://github.com/innovative365nl/compagnion/releases/download/v#{version.csv.first}-#{version.csv.second}/Compagnion-#{version.csv.first}-#{version.csv.second}.dmg"
   name "Compagnion"
   desc "Run Claude Code and Codex agents in parallel, each in its own git worktree"
-  homepage "https://compagnion.innovative.nl/"
+  homepage "https://github.com/innovative365nl/compagnion"
 
   livecheck do
-    url "https://compagnion.innovative.nl/downloads/latest.json"
-    strategy :json do |json|
-      "#{json["version"]},#{json["build"]}"
+    url :url
+    regex(/^v?(\d+(?:\.\d+)+)-(\d+)$/i)
+    strategy :github_latest do |json, regex|
+      match = json["tag_name"]&.match(regex)
+      next if match.blank?
+
+      "#{match[1]},#{match[2]}"
     end
   end
 
+  auto_updates true
   depends_on arch: :arm64
   depends_on macos: :sonoma
 
   app "Compagnion.app"
   binary "#{appdir}/Compagnion.app/Contents/Helpers/compagnion"
-
-  # The app is signed ad hoc, not notarized: with the quarantine flag Homebrew sets,
-  # macOS refuses to open it.
-  postflight_steps do
-    run "/usr/bin/xattr",
-        args:           ["-dr", "com.apple.quarantine", "{{appdir}}/Compagnion.app"],
-        writable_paths: ["Compagnion.app"],
-        writable_base:  :appdir
-  end
 
   # Not ~/.compagnion: that holds the repos, worktrees and sessions.
   zap trash: [

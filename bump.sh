@@ -1,39 +1,31 @@
 #!/bin/sh
-# Points Casks/compagnion.rb at the newest Compagnion on the download site: version,
-# build and SHA-256 from <site>/downloads/latest.json (written by compagnion-website's
-# build.sh). Run it after deploying a new build of the site, then commit and push.
+# Points Casks/compagnion.rb at the newest release of innovative365nl/compagnion: the
+# version and build from its tag (v<version>-<build>) and the SHA-256 of its disk image,
+# as GitHub reports it. Run it after scripts/publish.sh in CodeCompagnion, then commit
+# and push.
 #
-#   ./bump.sh [--site <url>] [--json <latest.json>]
-#
-# --json reads a local latest.json (e.g. compagnion-website/dist/downloads/latest.json)
-# instead of the one on the site; the cask keeps pointing at --site.
+#   ./bump.sh [<tag>]
 set -eu
 
 here=$(cd "$(dirname "$0")" && pwd)
 cask="$here/Casks/compagnion.rb"
-site=$(sed -n 's#^  homepage "\(.*\)/"$#\1#p' "$cask")
-json=""
-while [ $# -gt 0 ]; do
-    case "$1" in
-        --site) site="${2%/}"; shift 2 ;;
-        --json) json="$2"; shift 2 ;;
-        *) echo "usage: $0 [--site <url>] [--json <latest.json>]" >&2; exit 2 ;;
-    esac
-done
+releases=innovative365nl/compagnion
 
-if [ -n "$json" ]; then
-    latest=$(cat "$json")
-else
-    latest=$(curl -fsSL "$site/downloads/latest.json")
-fi
-field() { printf '%s' "$latest" | python3 -c "import json, sys; print(json.load(sys.stdin)['$1'])"; }
-version=$(field version)
-build=$(field build)
+release=$(gh release view ${1:+"$1"} --repo "$releases" --json tagName,assets)
+field() {
+    printf '%s' "${release}" | python3 -c "
+import json, sys
+release = json.load(sys.stdin)
+dmg = next(a for a in release['assets'] if a['name'].endswith('.dmg'))
+print({'tag': release['tagName'], 'sha256': dmg['digest'].removeprefix('sha256:')}['$1'])"
+}
+tag=$(field tag)
 sha256=$(field sha256)
+version=$(printf '%s' "${tag}" | sed -n 's/^v\([0-9.]*\)-\([0-9]*\)$/\1,\2/p')
+[ -n "${version}" ] || { echo "tag ${tag} is not v<version>-<build>" >&2; exit 1; }
 
 sed -i '' \
-    -e "s#^  version \".*\"#  version \"$version,$build\"#" \
-    -e "s#^  sha256 \".*\"#  sha256 \"$sha256\"#" \
-    -e "s#https://[^/\"]*/#$site/#g" \
-    "$cask"
-echo "compagnion ${version},${build} (${sha256}) from ${site}"
+    -e "s#^  version \".*\"#  version \"${version}\"#" \
+    -e "s#^  sha256 \".*\"#  sha256 \"${sha256}\"#" \
+    "${cask}"
+echo "compagnion ${version} (${sha256}) from ${releases} ${tag}"
