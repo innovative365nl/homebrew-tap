@@ -6,7 +6,7 @@ brew install --cask innovative365nl/tap/compagnion
 
 | Cask | What |
 |---|---|
-| `compagnion` | [Compagnion](https://github.com/innovative365nl/compagnion): run Claude Code and Codex agents in parallel, each in its own git worktree. Installs `Compagnion.app` and links the `compagnion` CLI. |
+| `compagnion` | [Compagnion](https://compagnion.dev/): run Claude Code and Codex agents in parallel, each in its own git worktree. Installs `Compagnion.app` and links the `compagnion` CLI. |
 
 Compagnion updates itself (Settings → General → Update automatically); `brew upgrade --greedy` also brings in a new version.
 

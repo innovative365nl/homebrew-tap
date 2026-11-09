@@ -5,7 +5,7 @@ cask "compagnion" do
   url "https://github.com/innovative365nl/compagnion/releases/download/v#{version.csv.first}-#{version.csv.second}/Compagnion-#{version.csv.first}-#{version.csv.second}.dmg"
   name "Compagnion"
   desc "Run Claude Code and Codex agents in parallel, each in its own git worktree"
-  homepage "https://github.com/innovative365nl/compagnion"
+  homepage "https://compagnion.dev/"
 
   livecheck do
     url :url
