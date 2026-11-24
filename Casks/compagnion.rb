@@ -1,6 +1,6 @@
 cask "compagnion" do
-  version "0.1.0,308"
-  sha256 "039ec825b98370ef4c5eb6f8ac363327625b8cbfed4378b1b58a6a0d110b0411"
+  version "0.1.0,312"
+  sha256 "e3f3bac0305b7cd60917a4d42c3829dda2ac5da9c5e5cb140fa89907af1130dc"
 
   url "https://github.com/innovative365nl/compagnion/releases/download/v#{version.csv.first}-#{version.csv.second}/Compagnion-#{version.csv.first}-#{version.csv.second}.dmg"
   name "Compagnion"
